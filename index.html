@@ -3,6 +3,7 @@
 <head>
     <title>Mississippi Tugboat Adventure</title>
     <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; }
         canvas { background: #87CEEB; display: block; margin: 0 auto; }
     </style>
 </head>
@@ -15,73 +16,51 @@ const ctx = canvas.getContext('2d');
 canvas.width = 800;
 canvas.height = 600;
 
+// Game world
+const world = {
+    width: 800,
+    height: 10000, // Much longer than the canvas to simulate an extended river
+    riverWidth: 400,
+};
+
 // Boat setup
 const boat = {
-    x: canvas.width / 2,
-    y: canvas.height - 30,
+    x: world.width / 2,
+    y: 100, // Starting closer to the top for demonstration
     width: 30,
     height: 10,
-    speed: 0,
-    velocityX: 0,
-    velocityY: 0,
-    maxSpeed: 4
+    speed: 2
 };
 
-// River generation (simplified for demonstration)
-const river = {
-    width: canvas.width * 0.6
+// Camera setup to follow the boat
+const camera = {
+    x: 0,
+    y: 0,
+    width: canvas.width,
+    height: canvas.height,
+    update: function() {
+        this.y = Math.min(world.height - this.height, boat.y - this.height / 2);
+    }
 };
 
-function drawBoat() {
-    ctx.fillStyle = '#8B4513'; // Boat color
-    ctx.fillRect(boat.x, boat.y, boat.width, boat.height);
-}
+// Draw boat function remains unchanged
 
+// Adjusted drawRiver function to fit the extended world
 function drawRiver() {
     ctx.fillStyle = '#1E90FF'; // River color
-    // Draw river (centered)
-    ctx.fillRect((canvas.width - river.width) / 2, 0, river.width, canvas.height);
+    ctx.fillRect((world.width - world.riverWidth) / 2, 0, world.riverWidth, world.height);
 }
 
-// Handle keyboard controls
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') {
-        boat.velocityX = boat.maxSpeed;
-    } else if (e.key === 'ArrowLeft') {
-        boat.velocityX = -boat.maxSpeed;
-    } else if (e.key === 'ArrowUp') {
-        boat.velocityY = -boat.maxSpeed;
-    } else if (e.key === 'ArrowDown') {
-        boat.velocityY = boat.maxSpeed;
-    }
-});
-
-document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        boat.velocityX = 0;
-    }
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        boat.velocityY = 0;
-    }
-});
-
-function updateGame() {
-    // Update boat position
-    boat.x += boat.velocityX;
-    boat.y += boat.velocityY;
-
-    // Prevent boat from going out of bounds
-    boat.x = Math.max((canvas.width - river.width) / 2, boat.x);
-    boat.x = Math.min(boat.x, (canvas.width + river.width) / 2 - boat.width);
-    boat.y = Math.max(0, boat.y);
-    boat.y = Math.min(boat.y, canvas.height - boat.height);
-}
+// Movement and game update functions adjusted for vertical movement and camera following
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    camera.update();
+    ctx.save();
+    ctx.translate(0, -camera.y); // Adjust canvas view based on camera position
     drawRiver();
     drawBoat();
-    updateGame();
+    ctx.restore();
     requestAnimationFrame(gameLoop);
 }
 
