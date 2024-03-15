@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mississippi Tugboat Adventure</title>
+    <style>
+        canvas { background: #87CEEB; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas"></canvas>
+<script>
+// Setup canvas
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 800;
+canvas.height = 600;
+
+// Boat setup
+const boat = {
+    x: canvas.width / 2,
+    y: canvas.height - 30,
+    width: 30,
+    height: 10,
+    speed: 0,
+    velocityX: 0,
+    velocityY: 0,
+    maxSpeed: 4
+};
+
+// River generation (simplified for demonstration)
+const river = {
+    width: canvas.width * 0.6
+};
+
+function drawBoat() {
+    ctx.fillStyle = '#8B4513'; // Boat color
+    ctx.fillRect(boat.x, boat.y, boat.width, boat.height);
+}
+
+function drawRiver() {
+    ctx.fillStyle = '#1E90FF'; // River color
+    // Draw river (centered)
+    ctx.fillRect((canvas.width - river.width) / 2, 0, river.width, canvas.height);
+}
+
+// Handle keyboard controls
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+        boat.velocityX = boat.maxSpeed;
+    } else if (e.key === 'ArrowLeft') {
+        boat.velocityX = -boat.maxSpeed;
+    } else if (e.key === 'ArrowUp') {
+        boat.velocityY = -boat.maxSpeed;
+    } else if (e.key === 'ArrowDown') {
+        boat.velocityY = boat.maxSpeed;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        boat.velocityX = 0;
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        boat.velocityY = 0;
+    }
+});
+
+function updateGame() {
+    // Update boat position
+    boat.x += boat.velocityX;
+    boat.y += boat.velocityY;
+
+    // Prevent boat from going out of bounds
+    boat.x = Math.max((canvas.width - river.width) / 2, boat.x);
+    boat.x = Math.min(boat.x, (canvas.width + river.width) / 2 - boat.width);
+    boat.y = Math.max(0, boat.y);
+    boat.y = Math.min(boat.y, canvas.height - boat.height);
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawRiver();
+    drawBoat();
+    updateGame();
+    requestAnimationFrame(gameLoop);
+}
+
+// Start game loop
+gameLoop();
+</script>
+</body>
+</html>
